@@ -1,0 +1,6 @@
+Id used for finding text block,Contents of text block. Supports markdown formatting.
+loc,text
+intro,"I am a petrophysicist with a unique combination of skills in applied machine learning, statistics and reservoir engineering. I am passionate about analyzing and extracting value from data, using exploration and visualization tools and deploying solutions for business problems.
+
+Currently searching for a position that allows me to build tools leveraging a combination of visualization, machine learning, and software engineering to help people explore and understand their data in new and useful ways."
+industy_experience_aside, " " 

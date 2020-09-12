@@ -1,0 +1,203 @@
+---
+title: "Marcelo Albuquerque's CV"
+author: Marcelo Albuquerque
+date: "`r Sys.Date()`"
+params:
+  pdf_mode:
+    value: true
+output:
+  pagedown::html_resume:
+    css: ['dd_cv.css', 'resume']
+    self_contained: false
+---
+
+```{css, echo=FALSE}
+:root {
+  --sidebar-width: 13rem; /* Shrink sidebar width  */
+  --sidebar-background-color: #f7fbff; /* Make sidebar blue */
+  --sidebar-horizontal-padding: 0.01in; /* Reduce sidebar padding */
+  --decorator-outer-dim: 10px; /* Make position deliniating circles larger */
+  --decorator-border: 2px solid #bdd7e7; /* Make timeline a blue as well*/
+}
+.aside {
+  width: calc(var(--sidebar-width) + 9px);
+  line-height: 1.2;
+  font-size: 0.68rem;
+}
+
+div#title p{
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+```
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  results='asis', 
+  echo = FALSE
+)
+
+library(magrittr) # For the pipe
+source("cv_printing_functions.r")
+
+# Read in all data and initialize a CV printer object
+CV <- create_CV_object(
+  data_location = "./data/",  
+  pdf_mode = params$pdf_mode
+)
+
+```
+
+```{r}
+# When in pdf export mode the little dots are unaligned, so fix that with some conditional CSS.
+if(params$pdf_mode) {
+    cat("
+<style>
+:root{
+  --decorator-outer-offset-left: -6.5px;
+}
+</style>")
+}
+```
+
+Aside
+================================================================================
+
+```{r echo=FALSE, message=FALSE}
+
+entries_data_logo = readr::read_csv("data/entries_logo.csv", skip=1)
+
+extract_year <- function(dates){
+    date_year <- stringr::str_extract(dates, "(20|19)[0-9]{2}")
+    date_year[is.na(date_year)] <- lubridate::year(lubridate::ymd(Sys.Date())) + 10
+
+    date_year
+  }
+
+  parse_dates <- function(dates){
+
+    date_month <- stringr::str_extract(dates, "(\\w+|\\d+)(?=(\\s|\\/|-)(20|19)[0-9]{2})")
+    date_month[is.na(date_month)] <- "1"
+
+    paste("1", date_month, extract_year(dates), sep = "-") %>%
+      lubridate::dmy()
+  }
+  
+    
+entries_data_logo %<>%
+    tidyr::unite(
+      tidyr::starts_with('description'),
+      col = "description_bullets",
+      sep = "\n- ",
+      na.rm = TRUE
+    ) %>%
+    dplyr::mutate(
+      description_bullets = ifelse(description_bullets != "", paste0("- ", description_bullets), ""),
+      start = ifelse(start == "NULL", NA, start),
+      end = ifelse(end == "NULL", NA, end),
+      start_year = extract_year(start),
+      end_year = extract_year(end),
+      no_start = is.na(start),
+      has_start = !no_start,
+      no_end = is.na(end),
+      has_end = !no_end,
+      timeline = dplyr::case_when(
+        no_start  & no_end  ~ "N/A",
+        no_start  & has_end ~ as.character(end),
+        has_start & no_end  ~ paste("Current", "-", start),
+        TRUE                ~ paste(end, "-", start)
+      )
+    ) %>%
+    dplyr::arrange(desc(parse_dates(end))) %>%
+    dplyr::mutate_all(~ ifelse(is.na(.), 'N/A', .))
+
+# Build interactive network of positions colored by section
+# and connected if they occurred in the same year
+datadrivencv::build_network_logo(entries_data_logo %>% 
+                                   dplyr::mutate(title=""))
+# datadrivencv::build_network_logo(CV$entries_data)
+```
+
+
+```{r}
+if(params$pdf_mode){
+  cat("View this CV online with links at <a href='https://mralbu.github.io/cv'><div style='padding-left: 35px'>mralbu.github.io/cv</div></a>")
+} else {
+  cat("[<i class='fas fa-download'></i> Download a PDF of this CV](https://mralbu.github.io/cv/mralbu_cv.pdf)")
+}
+```
+
+Contact {#contact}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %>% print_contact_info()
+```
+
+
+
+Language Skills {#skills}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %>% print_skill_bars()
+```
+
+
+
+Disclaimer {#disclaimer}
+--------------------------------------------------------------------------------
+
+Made with the R package [**pagedown**](https://github.com/rstudio/pagedown). 
+
+Last updated on `r Sys.Date()`.
+
+Main
+================================================================================
+
+Marcelo Albuquerque {#title}
+--------------------------------------------------------------------------------
+
+```{r}
+# Note the special double pipe so we modify the CV object in place
+CV %<>% print_text_block("intro") 
+```
+
+
+
+Education {data-icon=graduation-cap data-concise=true}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('education')
+```
+
+Industry Experience {data-icon=suitcase}
+--------------------------------------------------------------------------------
+
+::: aside
+```{r}
+CV %<>% print_text_block('industy_experience_aside')
+```
+:::
+
+```{r}
+CV %<>% print_section('industry_positions')
+```
+
+
+Research Experience {data-icon=laptop}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('research_positions')
+```
+
+
+Publications {data-icon=book}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('academic_articles')
+```
