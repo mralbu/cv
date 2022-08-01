@@ -136,7 +136,6 @@ CV %>% print_contact_info()
 ```
 
 
-
 Language Skills {#skills}
 --------------------------------------------------------------------------------
 
@@ -176,11 +175,11 @@ CV %<>% print_section('education')
 Industry Experience {data-icon=suitcase}
 --------------------------------------------------------------------------------
 
-::: aside
-```{r}
-CV %<>% print_text_block('industy_experience_aside')
-```
-:::
+<!-- ::: aside -->
+<!-- ```{r} -->
+<!-- CV %<>% print_text_block('industy_experience_aside') -->
+<!-- ``` -->
+<!-- ::: -->
 
 ```{r}
 CV %<>% print_section('industry_positions')
