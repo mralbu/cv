@@ -200,3 +200,14 @@ Publications {data-icon=book}
 ```{r}
 CV %<>% print_section('academic_articles')
 ```
+
+
+Awards and Achievements {data-icon=trophy}
+--------------------------------------------------------------------------------
+
+```{r}
+CV %<>% print_section('awards')
+```
+
+
+
